@@ -136,6 +136,7 @@ def btn_click(choice):
                            
 
         if choice == 'Bank':
+            pause_count -= 1 #final stop before entering the data
             pass
     else:
         mb.showwarning(title='Please Select Topic', message = 'Please select a topic before starting')
