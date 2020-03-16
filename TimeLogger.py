@@ -27,7 +27,9 @@ def btn_click(choice):
     global starttime
     global topic
     global stoptime
+    global stop_timing
     global totalET
+    global table_state
 
 
     
@@ -136,8 +138,25 @@ def btn_click(choice):
                            
 
         if choice == 'Bank':
-            pause_count -= 1 #final stop before entering the data
-            pass
+            pause_count -= 1 #adjust number of pauses before entering the data
+            commit_date = datetime.date.today()
+            subject = subjectlistBox.get(tk.ACTIVE)
+            time_started = starttime.strftime('%H:%M:%S')
+            time_stopped = stop_timing.strftime('%H:%M:%S')
+            accumulated_time = entAccumTime.get()[0:7]
+            elapsed_time = entElapsedTime.get()[0:7]
+            
+            conn = sqlite3.connect('test.db')
+            c = conn.cursor()       
+            c.execute("CREATE TABLE IF NOT EXISTS testdata(date TEXT, subject TEXT, pauses INTEGER, start_time TEXT, end_time TEXT, accumulated_time, elapsed_time TEXT)")
+            
+            c.execute("INSERT INTO testdata(date, subject, pauses, start_time, end_time, accumulated_time, elapsed_time) VALUES(?,?,?,?,?,?,?)",
+                      (commit_date,subject,pause_count, time_started, time_stopped, accumulated_time, elapsed_time))
+            conn.commit()
+            c.close()
+            conn.close()
+                
+            
     else:
         mb.showwarning(title='Please Select Topic', message = 'Please select a topic before starting')
         
