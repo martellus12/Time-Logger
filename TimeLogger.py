@@ -3,6 +3,9 @@ from tkinter import messagebox as mb
 from tkinter import font
 import datetime
 import sqlite3
+import pytimeparse # From WildWilhelm on GitHub to convert strings of accum and elapsed times to integer seconds
+import operator #For sorting the Dictionary of Subject/Accumulated times
+
 
 #print(tk.font.families())
 #..font = ('Modern', 30)
@@ -28,7 +31,6 @@ def btn_click(choice):
     global topic
     global stoptime
     global stop_timing
-    global totalET
     global table_state
 
 
@@ -109,15 +111,18 @@ def btn_click(choice):
             #"""now convert string to datetime object, take out the weird Jan 1 1900 part and
             #make it the current day/year/month using .replace(): (note- can't use %T format for some reason)"""
             #starttime = datetime.datetime.strptime(startstring, '%H:%M:%S').replace(stoptime.year, stoptime.month, stoptime.day)
+            
+            #### PRINT STATEMENTS FOR DIAGNOSTIC PURPOSES##############################################################
+            
             #print(starttime)
             #print('starttime is a {} value'.format(type(starttime)))
-            print(starttime)
-            print(stoptime)
-            print(topic)
-            print(accum_time)
-            print(totalET)
-            print(pause_count)
-            print(subjectlistBox.get(tk.ACTIVE))################
+            #print(starttime)
+            #print(stoptime)
+            #print(topic)
+            #print(accum_time)
+            #print(stop_timing - starttime)
+            #print(pause_count)
+            #print(subjectlistBox.get(tk.ACTIVE))################
             #Reset the Entry Fields:
             entStop.delete(0, END)
             entStart.delete(0,END)
@@ -143,8 +148,8 @@ def btn_click(choice):
             subject = subjectlistBox.get(tk.ACTIVE)
             time_started = starttime.strftime('%H:%M:%S')
             time_stopped = stop_timing.strftime('%H:%M:%S')
-            accumulated_time = entAccumTime.get()[0:7]
-            elapsed_time = entElapsedTime.get()[0:7]
+            accumulated_time = entAccumTime.get()[0:7] #because it's a string
+            elapsed_time = entElapsedTime.get()[0:7]   # ditto
             
             conn = sqlite3.connect('test.db')
             c = conn.cursor()       
@@ -155,7 +160,7 @@ def btn_click(choice):
             conn.commit()
             c.close()
             conn.close()
-                
+            btn_click('Reset')    
             
     else:
         mb.showwarning(title='Please Select Topic', message = 'Please select a topic before starting')
@@ -163,10 +168,100 @@ def btn_click(choice):
         
 
 def get_rank():
-    pass
     
+    conn = sqlite3.connect('test.db')
+    c = conn.cursor()
+    c.execute("SELECT subject, accumulated_time FROM testdata")
+    dat = c.fetchall()
+    data_dict = {}
+    for  tup in(dat): #Create a Dictionary with the accumulated time converted to seconds(lots of headache, don't ask)
 
+        if tup[0] not in data_dict:
+            data_dict[tup[0]] = pytimeparse.parse(tup[1])
+        else:
+            data_dict[tup[0]] = data_dict[tup[0]] + pytimeparse.parse(tup[1])
 
+    sorted_items = sorted(data_dict.items(), key = operator.itemgetter(1)) #Generate a list sorted by accum time
+    sorted_items.reverse() #reverse the list so that the most accumulated time is first on the list
+    print(sorted_items)
+     ################################  This is where we begin to populate the Rank Boxes   ####################
+             # It's not great code, but it works.  I have to do this because the entry boxes are not indexed and
+             # there is no way to populate them using a FOR loop in Tkinter. If the number is subjects in the listbox
+             # were to increase, This double-if loop will need to be expanded.  I will revisit this someday to optimize it.
+             
+    num1 = 1
+    if num1 < len(sorted_items):
+        if num1 == 1:
+            entRank1.delete(0,END)
+            entRank1Time.delete(0, END)
+            entRank1.insert(0, sorted_items[0][0])
+            entRank1Time.insert(0, datetime.timedelta(seconds = sorted_items[0][1])) # datetime for converting seconds to H:M:S
+            num1 += 1
+        if num1 == 2:
+            entRank2.delete(0,END)
+            entRank2Time.delete(0, END)
+            entRank2.insert(0, sorted_items[1][0])
+            entRank2Time.insert(0, datetime.timedelta(seconds = sorted_items[1][1]))
+            num1 += 1
+        if num1 == 3:
+            entRank3.delete(0,END)
+            entRank3Time.delete(0, END)
+            entRank3.insert(0, sorted_items[2][0])
+            entRank3Time.insert(0, datetime.timedelta(seconds = sorted_items[2][1]))
+            num1 += 1
+        if num1 == 4:
+            entRank4.delete(0,END)
+            entRank4Time.delete(0, END)
+            entRank4.insert(0, sorted_items[3][0])
+            entRank4Time.insert(0, datetime.timedelta(seconds = sorted_items[3][1]))
+            num1 += 1
+        if num1 == 5:
+            entRank5.delete(0,END)
+            entRank5Time.delete(0, END)
+            entRank5.insert(0, sorted_items[4][0])
+            entRank5Time.insert(0, datetime.timedelta(seconds = sorted_items[4][1]))
+            num1 += 1
+        if num1 == 6:
+            entRank6.delete(0,END)
+            entRank6Time.delete(0, END)
+            entRank6.insert(0, sorted_items[5][0])
+            entRank6Time.insert(0, datetime.timedelta(seconds = sorted_items[5][1]))
+            num1 += 1
+        if num1 == 7:
+            entRank7.delete(0,END)
+            entRank7Time.delete(0, END)
+            entRank7.insert(0, sorted_items[6][0])
+            entRank7Time.insert(0, datetime.timedelta(seconds = sorted_items[6][1]))
+            num1 += 1
+        if num1 == 8:
+            entRank8.delete(0,END)
+            entRank8Time.delete(0, END)
+            entRank8.insert(0, sorted_items[7][0])
+            entRank8Time.insert(0, datetime.timedelta(seconds = sorted_items[7][1]))
+            num1 += 1
+        if num1 == 9:
+            entRank9.delete(0,END)
+            entRank9Time.delete(0, END)
+            entRank9.insert(0, sorted_items[8][0])
+            entRank9Time.insert(0, datetime.timedelta(seconds = sorted_items[8][1]))
+            num1 += 1
+        if num1 == 10:
+            entRank10.delete(0,END)
+            entRank10Time.delete(0, END)
+            entRank10.insert(0, sorted_items[9][0])
+            entRank10Time.insert(0, datetime.timedelta(seconds = sorted_items[9][1]))
+            num1 += 1
+            
+################ SPARE PARTS ROOM CODE  #####################################################################     
+        #print(item[0],datetime.datetime.strptime(item[1],'%H:%M:%S').time())  #THIS WORKS!!!!!     
+        #print(datetime.time(*map(int, item[1].split(':')))) #This works too!!!!!   
+        #time = datetime.datetime.datetime(item[1],'%H:%M:%S').time()
+
+##        data_dict.setdefault(tup[0],0)
+##        time = pytimeparse.parse(tup[1])
+##        data_dict[tup] = data_dict[tup] +time
+
+############################################################################################################       
 
 
 timeLog = tk.Tk() #Main Body
@@ -266,26 +361,26 @@ entPauses.place(relx = 0.1, rely = 0.7, relheight = 0.1, relwidth = 0.1)
 lblPauses = tk.Label(workFrame, text = 'Pauses')                                  
 lblPauses.place(relx = 0, rely = 0.7, relheight = 0.1, relwidth = 0.1)
 
-entRank1 = tk.Entry(reportFrame, bd = 3)
-entRank1Time = tk.Entry(reportFrame, bd = 3)
-entRank2 = tk.Entry(reportFrame, bd = 3)
-entRank2Time = tk.Entry(reportFrame, bd = 3)
-entRank3 = tk.Entry(reportFrame, bd = 3)
-entRank3Time = tk.Entry(reportFrame, bd = 3)
-entRank4 = tk.Entry(reportFrame, bd = 3)
-entRank4Time = tk.Entry(reportFrame, bd = 3)
-entRank5 = tk.Entry(reportFrame, bd = 3)
-entRank5Time = tk.Entry(reportFrame, bd = 3)
-entRank6 = tk.Entry(reportFrame, bd = 3)
-entRank6Time = tk.Entry(reportFrame, bd = 3)
-entRank7 = tk.Entry(reportFrame, bd = 3)
-entRank7Time = tk.Entry(reportFrame, bd = 3)
-entRank8 = tk.Entry(reportFrame, bd = 3)
-entRank8Time = tk.Entry(reportFrame, bd = 3)
-entRank9 = tk.Entry(reportFrame, bd = 3)
-entRank9Time = tk.Entry(reportFrame, bd = 3)
-entRank10 = tk.Entry(reportFrame, bd = 3)
-entRank10Time = tk.Entry(reportFrame, bd = 3)
+entRank1 = tk.Entry(reportFrame, bd = 3, justify = 'center')
+entRank1Time = tk.Entry(reportFrame, bd = 3, justify = 'center')
+entRank2 = tk.Entry(reportFrame, bd = 3, justify = 'center')
+entRank2Time = tk.Entry(reportFrame, bd = 3, justify = 'center')
+entRank3 = tk.Entry(reportFrame, bd = 3, justify = 'center')
+entRank3Time = tk.Entry(reportFrame, bd = 3, justify = 'center')
+entRank4 = tk.Entry(reportFrame, bd = 3, justify = 'center')
+entRank4Time = tk.Entry(reportFrame, bd = 3, justify = 'center')
+entRank5 = tk.Entry(reportFrame, bd = 3, justify = 'center')
+entRank5Time = tk.Entry(reportFrame, bd = 3, justify = 'center')
+entRank6 = tk.Entry(reportFrame, bd = 3, justify = 'center')
+entRank6Time = tk.Entry(reportFrame, bd = 3, justify = 'center')
+entRank7 = tk.Entry(reportFrame, bd = 3, justify = 'center')
+entRank7Time = tk.Entry(reportFrame, bd = 3, justify = 'center')
+entRank8 = tk.Entry(reportFrame, bd = 3, justify = 'center')
+entRank8Time = tk.Entry(reportFrame, bd = 3, justify = 'center')
+entRank9 = tk.Entry(reportFrame, bd = 3, justify = 'center')
+entRank9Time = tk.Entry(reportFrame, bd = 3, justify = 'center')
+entRank10 = tk.Entry(reportFrame, bd = 3, justify = 'center')
+entRank10Time = tk.Entry(reportFrame, bd = 3, justify = 'center')
 
 entRank1.place(height  = 30, width = 100, relx = 0.1, rely = 0.1)
 entRank1Time.place(height  = 30, width = 150, relx = 0.6, rely = 0.1)
@@ -340,6 +435,7 @@ subjectlistBox.insert(6, 'Linux/Bash')
 subjectlistBox.insert(7, 'Tkinter')
 subjectlistBox.insert(8, 'React')
 subjectlistBox.insert(9, 'PostGres')
+subjectlistBox.insert(10, 'Debugging')
 
 
 
