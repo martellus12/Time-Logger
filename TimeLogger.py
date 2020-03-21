@@ -4,7 +4,7 @@ from tkinter import font
 import datetime
 import sqlite3
 import pytimeparse # From WildWilhelm on GitHub to convert strings of accum and elapsed times to integer seconds
-import operator #For sorting the Dictionary of Subject/Accumulated times
+import operator #For sorting the Dictionary based on Subject/Accumulated times
 
 
 #print(tk.font.families())
@@ -15,14 +15,17 @@ HEIGHT = 700
 END = 1000
 INSERT = 0
 
-
-
 state = 0
 pause_count = 0
+
 
 ###   Define Functions   ###############################################################################
 
 def btn_click(choice):
+    
+    """ This function will populated the Time boxes and enable/disable function buttons depending on the current
+        state of the logger.  """
+    
     global state
     global pause_count
     global accum_time
@@ -35,13 +38,15 @@ def btn_click(choice):
 
 
     
-    if subjectlistBox.curselection():
+    if subjectlistBox.curselection():  #The process will not start until a subject is chosed from the listbox
         if choice == 'Start':
             starttime = datetime.datetime.now()
             entStart.delete(0,END)
             entStart.insert(0, datetime.datetime.strftime(starttime, '%T'))
             btnStart.config(state = tk.DISABLED)
             btnPause.config(state = tk.NORMAL)
+            btnBank.config(state = tk.DISABLED)
+            btnReset.config(state = tk.DISABLED)
 
 
             
@@ -53,8 +58,7 @@ def btn_click(choice):
                 btnPause.config(bg = 'red')
                 if pause_count == 0:                
                     accum_time = stop_timing - starttime
-                    print('First Accum Time')
-                    pause_count = pause_count + 1
+                    pause_count += 1
                     state = 1
                     entElapsedTime.delete(0,END)
                     entElapsedTime.insert(0, stop_timing - starttime)
@@ -66,7 +70,6 @@ def btn_click(choice):
                 else:                               #if this is not the first pause
                     accum_interval  = stop_timing - new_start
                     accum_time = accum_time + accum_interval
-                    print('Second Accum Time')
                     pause_count += 1
                     state = 1
                     entAccumTime.delete(0, END)
@@ -88,9 +91,6 @@ def btn_click(choice):
                     entElapsedTime.delete(0, END)
                     entElapsedTime.insert(0, stop_timing - starttime)
                     print('should be starting accumtime')
-
-
-
                     
         elif choice == 'Reset':
             stoptime = datetime.datetime.now()
@@ -100,29 +100,11 @@ def btn_click(choice):
             btnPause.config(state = tk.DISABLED, bg = '#E0E0E0')
             btnReset.config(state = tk.DISABLED)
             btnBank.config(state = tk.DISABLED)
+            
             #Reset the ListBox choice:
             subjectlistBox.select_clear(0,END)
             state = 0
             
-            
-            
-            #get the string version of start time from Start Time Box:
-            #startstring = entStart.get()
-            #"""now convert string to datetime object, take out the weird Jan 1 1900 part and
-            #make it the current day/year/month using .replace(): (note- can't use %T format for some reason)"""
-            #starttime = datetime.datetime.strptime(startstring, '%H:%M:%S').replace(stoptime.year, stoptime.month, stoptime.day)
-            
-            #### PRINT STATEMENTS FOR DIAGNOSTIC PURPOSES##############################################################
-            
-            #print(starttime)
-            #print('starttime is a {} value'.format(type(starttime)))
-            #print(starttime)
-            #print(stoptime)
-            #print(topic)
-            #print(accum_time)
-            #print(stop_timing - starttime)
-            #print(pause_count)
-            #print(subjectlistBox.get(tk.ACTIVE))################
             #Reset the Entry Fields:
             entStop.delete(0, END)
             entStart.delete(0,END)
@@ -131,15 +113,6 @@ def btn_click(choice):
             entPauses.delete(0,END)
             #Reset the Pause Count
             pause_count = 0
-            
-
-            
-
-            ###This code gets the index of the list box and uses it to determine the list item
-            ## and puts it in the Accum Time entry field.  Its pretty stupid but it works
-            #indx = subjectlistBox.curselection()
-            #entAccumTime.delete(0,END)
-            #entAccumTime.insert(0,subjectlistBox.get(indx))
                            
 
         if choice == 'Bank':
@@ -168,6 +141,10 @@ def btn_click(choice):
         
 
 def get_rank():
+    """This function queries the Database, accumulates the logged time spent on a subject, and
+        creates a dictionary based on the results.  The dictionary is then coverted to a list for ranking
+        the subjects according to time, with the most studied subject first on the list.  Then, the results
+        written to the entry boxes.  """
     
     conn = sqlite3.connect('test.db')
     c = conn.cursor()
@@ -183,7 +160,7 @@ def get_rank():
 
     sorted_items = sorted(data_dict.items(), key = operator.itemgetter(1)) #Generate a list sorted by accum time
     sorted_items.reverse() #reverse the list so that the most accumulated time is first on the list
-    print(sorted_items)
+    
      ################################  This is where we begin to populate the Rank Boxes   ####################
              # It's not great code, but it works.  I have to do this because the entry boxes are not indexed and
              # there is no way to populate them using a FOR loop in Tkinter. If the number is subjects in the listbox
@@ -267,7 +244,7 @@ def get_rank():
 timeLog = tk.Tk() #Main Body
 timeLog.title('Time Logger')
 
-canvas = tk.Canvas(timeLog, height = HEIGHT, width = WIDTH, bg = 'yellow')
+canvas = tk.Canvas(timeLog, height = HEIGHT, width = WIDTH)
 canvas.pack()
 
 
@@ -277,7 +254,7 @@ canvas.pack()
 workFrame = tk.Frame(timeLog, bg = 'blue', bd = 5)
 workFrame.place(height = 200, width = 400, relx = 0, rely = 0)
 
-reportFrame = tk.Frame(timeLog, bg = 'red', bd = 5)
+reportFrame = tk.Frame(timeLog, bd = 5)
 reportFrame.place(height = 500, width = 400, x = 0, y = 200)
 
 ############ LABELS #####################################################
@@ -421,6 +398,9 @@ btnRank = tk.Button(reportFrame, text = 'Update Category Ranking', bd = 3, comma
 btnRank.place(relx = 0.25, y = 0, width = 200, height = 40)
 
 ############ LISTBOXES ##################################################
+""" NOTE: This code can only handle 10 subjects in the list box.
+if more subjects are needed, the number of Rank boxes and the
+code that populates them must be expanded."""
 
 subjectlistBox = tk.Listbox(workFrame)
 subjectlistBox.place(relheight = 0.4, relwidth = 0.32, relx = 0, rely = 0.2)
