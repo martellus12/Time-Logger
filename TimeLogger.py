@@ -1,3 +1,10 @@
+#############################################################################################
+#                                                                                           #
+#   To be added:    Dynamic Population of ListBox                                           #
+#                   Break Tasks into Functions                                              #
+#                                                                                           #
+#############################################################################################
+
 import tkinter as tk
 from tkinter import messagebox as mb
 from tkinter import font
@@ -5,10 +12,6 @@ import datetime
 import sqlite3
 import pytimeparse # From WildWilhelm on GitHub to convert strings of accum and elapsed times to integer seconds
 import operator #For sorting the Dictionary based on Subject/Accumulated times
-
-
-#print(tk.font.families())
-#..font = ('Modern', 30)
 
 WIDTH = 400
 HEIGHT = 700
@@ -38,7 +41,7 @@ def btn_click(choice):
 
 
     
-    if subjectlistBox.curselection():  #The process will not start until a subject is chosed from the listbox
+    if subjectlistBox.curselection():  #The process will not start until a subject is chosen from the listbox
         if choice == 'Start':
             starttime = datetime.datetime.now()
             entStart.delete(0,END)
@@ -90,7 +93,7 @@ def btn_click(choice):
                     btnBank.config(state = tk.DISABLED)
                     entElapsedTime.delete(0, END)
                     entElapsedTime.insert(0, stop_timing - starttime)
-                    print('should be starting accumtime')
+
                     
         elif choice == 'Reset':
             stoptime = datetime.datetime.now()
@@ -116,7 +119,7 @@ def btn_click(choice):
                            
 
         if choice == 'Bank':
-            pause_count -= 1 #adjust number of pauses before entering the data
+            pause_count -= 1 #adjust number of pauses before entering the data to exclude final pause B4 banking time
             commit_date = datetime.date.today()
             subject = subjectlistBox.get(tk.ACTIVE)
             time_started = starttime.strftime('%H:%M:%S')
@@ -124,11 +127,11 @@ def btn_click(choice):
             accumulated_time = entAccumTime.get()[0:7] #because it's a string
             elapsed_time = entElapsedTime.get()[0:7]   # ditto
             
-            conn = sqlite3.connect('test.db')
+            conn = sqlite3.connect('subject_time.db')
             c = conn.cursor()       
-            c.execute("CREATE TABLE IF NOT EXISTS testdata(date TEXT, subject TEXT, pauses INTEGER, start_time TEXT, end_time TEXT, accumulated_time, elapsed_time TEXT)")
+            c.execute("CREATE TABLE IF NOT EXISTS subject_time(date TEXT, subject TEXT, pauses INTEGER, start_time TEXT, end_time TEXT, accumulated_time, elapsed_time TEXT)")
             
-            c.execute("INSERT INTO testdata(date, subject, pauses, start_time, end_time, accumulated_time, elapsed_time) VALUES(?,?,?,?,?,?,?)",
+            c.execute("INSERT INTO subject_time(date, subject, pauses, start_time, end_time, accumulated_time, elapsed_time) VALUES(?,?,?,?,?,?,?)",
                       (commit_date,subject,pause_count, time_started, time_stopped, accumulated_time, elapsed_time))
             conn.commit()
             c.close()
@@ -146,7 +149,7 @@ def get_rank():
         the subjects according to time, with the most studied subject first on the list.  Then, the results
         written to the entry boxes.  """
     
-    conn = sqlite3.connect('test.db')
+    conn = sqlite3.connect('subject_time.db')
     c = conn.cursor()
     c.execute("SELECT subject, accumulated_time FROM testdata")
     dat = c.fetchall()
@@ -163,7 +166,7 @@ def get_rank():
     
      ################################  This is where we begin to populate the Rank Boxes   ####################
              # It's not great code, but it works.  I have to do this because the entry boxes are not indexed and
-             # there is no way to populate them using a FOR loop in Tkinter. If the number is subjects in the listbox
+             # there is no way to populate them using a FOR loop in Tkinter. If the number of subjects in the listbox
              # were to increase, This double-if loop will need to be expanded.  I will revisit this someday to optimize it.
              
     num1 = 1
@@ -238,6 +241,9 @@ def get_rank():
 ##        time = pytimeparse.parse(tup[1])
 ##        data_dict[tup] = data_dict[tup] +time
 
+            #print(tk.font.families())
+            #..font = ('Modern', 30)
+
 ############################################################################################################       
 
 
@@ -259,9 +265,9 @@ reportFrame.place(height = 500, width = 400, x = 0, y = 200)
 
 ############ LABELS #####################################################
 
-lblTopic = tk.Label(workFrame, text = 'Topic', anchor = tk.W)
+lblTopic = tk.Label(workFrame, text = 'Topic (Choose One)', anchor = tk.W)
 lblTopic.place(relx = 0, rely = 0, relheight = 0.15
-               , relwidth = 0.25)
+               , relwidth = 0.3)
 
 lblStart = tk.Label(workFrame, text = 'Start Time', anchor = tk.E)
 lblStart.place(relx = 0.5, rely = 0, relheight = 0.15, relwidth = 0.2)
@@ -413,9 +419,9 @@ subjectlistBox.insert(4, 'PHP')
 subjectlistBox.insert(5, 'Server')
 subjectlistBox.insert(6, 'Linux/Bash')
 subjectlistBox.insert(7, 'Tkinter')
-subjectlistBox.insert(8, 'React')
-subjectlistBox.insert(9, 'PostGres')
-subjectlistBox.insert(10, 'Debugging')
+subjectlistBox.insert(8, 'PostGres')
+subjectlistBox.insert(9, 'Debugging')
+subjectlistBox.insert(10, 'HTML')
 
 
 
