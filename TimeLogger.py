@@ -170,62 +170,70 @@ def get_rank():
              # were to increase, This double-if loop will need to be expanded.  I will revisit this someday to optimize it.
              
     num1 = 1
-    if num1 < len(sorted_items):
+    print(num1)
+    while num1 <= len(sorted_items):
+        print('num1 is: {}, while len(sorted_items) is: {}'.format(num1, len(sorted_items)))
         if num1 == 1:
             entRank1.delete(0,END)
             entRank1Time.delete(0, END)
             entRank1.insert(0, sorted_items[0][0])
             entRank1Time.insert(0, datetime.timedelta(seconds = sorted_items[0][1])) # datetime for converting seconds to H:M:S
             num1 += 1
-        if num1 == 2:
+            print(num1)
+            
+        elif num1 == 2:
             entRank2.delete(0,END)
             entRank2Time.delete(0, END)
             entRank2.insert(0, sorted_items[1][0])
             entRank2Time.insert(0, datetime.timedelta(seconds = sorted_items[1][1]))
             num1 += 1
-        if num1 == 3:
+            print(num1)
+        elif num1 == 3:
             entRank3.delete(0,END)
             entRank3Time.delete(0, END)
             entRank3.insert(0, sorted_items[2][0])
             entRank3Time.insert(0, datetime.timedelta(seconds = sorted_items[2][1]))
             num1 += 1
-        if num1 == 4:
+            print(num1)
+        elif num1 == 4:
             entRank4.delete(0,END)
             entRank4Time.delete(0, END)
             entRank4.insert(0, sorted_items[3][0])
             entRank4Time.insert(0, datetime.timedelta(seconds = sorted_items[3][1]))
             num1 += 1
-        if num1 == 5:
+            print(num1)
+        elif num1 == 5:
             entRank5.delete(0,END)
             entRank5Time.delete(0, END)
-            entRank5.insert(0, sorted_items[4][0])
+            entRank5.insert(0, sorted_items[4][0]) ##########This is where the problem starts
             entRank5Time.insert(0, datetime.timedelta(seconds = sorted_items[4][1]))
             num1 += 1
-        if num1 == 6:
+            print(num1)
+        elif num1 == 6:
             entRank6.delete(0,END)
             entRank6Time.delete(0, END)
             entRank6.insert(0, sorted_items[5][0])
             entRank6Time.insert(0, datetime.timedelta(seconds = sorted_items[5][1]))
             num1 += 1
-        if num1 == 7:
+        elif num1 == 7:
             entRank7.delete(0,END)
             entRank7Time.delete(0, END)
             entRank7.insert(0, sorted_items[6][0])
             entRank7Time.insert(0, datetime.timedelta(seconds = sorted_items[6][1]))
             num1 += 1
-        if num1 == 8:
+        elif num1 == 8:
             entRank8.delete(0,END)
             entRank8Time.delete(0, END)
             entRank8.insert(0, sorted_items[7][0])
             entRank8Time.insert(0, datetime.timedelta(seconds = sorted_items[7][1]))
             num1 += 1
-        if num1 == 9:
+        elif num1 == 9:
             entRank9.delete(0,END)
             entRank9Time.delete(0, END)
             entRank9.insert(0, sorted_items[8][0])
             entRank9Time.insert(0, datetime.timedelta(seconds = sorted_items[8][1]))
             num1 += 1
-        if num1 == 10:
+        elif num1 == 10:
             entRank10.delete(0,END)
             entRank10Time.delete(0, END)
             entRank10.insert(0, sorted_items[9][0])
