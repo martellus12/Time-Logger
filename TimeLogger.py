@@ -1,6 +1,6 @@
 #############################################################################################
 #                                                                                           #
-#   To be added:    Dynamic Population of ListBox                                           #
+#   To be added:    Loading of Topics from Database                                          #
 #                   Break Tasks into Functions                                              #
 #                                                                                           #
 #############################################################################################
@@ -14,7 +14,7 @@ import pytimeparse # From WildWilhelm on GitHub to convert strings of accum and 
 import operator #For sorting the Dictionary based on Subject/Accumulated times
 
 WIDTH = 400
-HEIGHT = 700
+HEIGHT = 750
 END = 1000
 INSERT = 0
 
@@ -151,7 +151,7 @@ def get_rank():
     
     conn = sqlite3.connect('subject_time.db')
     c = conn.cursor()
-    c.execute("SELECT subject, accumulated_time FROM testdata")
+    c.execute("SELECT subject, accumulated_time FROM subject_time")
     dat = c.fetchall()
     data_dict = {}
     for  tup in(dat): #Create a Dictionary with the accumulated time converted to seconds(lots of headache, don't ask)
@@ -231,6 +231,36 @@ def get_rank():
             entRank10.insert(0, sorted_items[9][0])
             entRank10Time.insert(0, datetime.timedelta(seconds = sorted_items[9][1]))
             num1 += 1
+
+def change_topic(do):
+    
+    if do == 'add':
+        if subjectlistBox.size() < 10:
+            if entTopic.get():
+                subjectlistBox.insert(END, entTopic.get())
+                entTopic.delete(0,END)
+            else:
+                mb.showwarning(title='Blank Topic', message = 'No Topic to Add, Please Enter a Topic')
+        else:
+            mb.showwarning(title='List Box Full', message = 'The List is Full, Please Delete an Item From the List Before Adding Items')
+            
+
+    elif do == 'delete':
+        if subjectlistBox.curselection():
+            deleted_topic = subjectlistBox.curselection()  #This is the index of the topic to be deleted
+            deleted_text = subjectlistBox.get(deleted_topic) #This is the text referred to by the index
+            subjectlistBox.delete(deleted_topic)
+            mb.showinfo(title = 'Topic Deleted', message = 'Deleted Topic: {}'.format(deleted_text))
+        else:
+            mb.showwarning(title='Blank Topic', message = 'No Topic to Delete, Please Select a Topic to Delete')
+                
+
+    
+        
+
+  
+
+
             
 ################ SPARE PARTS ROOM CODE  #####################################################################     
         #print(item[0],datetime.datetime.strptime(item[1],'%H:%M:%S').time())  #THIS WORKS!!!!!     
@@ -258,28 +288,27 @@ canvas.pack()
 ############# FRAMES ####################################################
 
 workFrame = tk.Frame(timeLog, bg = 'blue', bd = 5)
-workFrame.place(height = 200, width = 400, relx = 0, rely = 0)
+workFrame.place(height = 260, width = 400, relx = 0, rely = 0)
 
 reportFrame = tk.Frame(timeLog, bd = 5)
-reportFrame.place(height = 500, width = 400, x = 0, y = 200)
+reportFrame.place(height = 500, width = 400, x = 0, y = 260)
 
 ############ LABELS #####################################################
 
 lblTopic = tk.Label(workFrame, text = 'Topic (Choose One)', anchor = tk.W)
-lblTopic.place(relx = 0, rely = 0, relheight = 0.15
-               , relwidth = 0.3)
+lblTopic.place(relx = 0, rely = 0, height = 30, width = 128)
 
 lblStart = tk.Label(workFrame, text = 'Start Time', anchor = tk.E)
-lblStart.place(relx = 0.5, rely = 0, relheight = 0.15, relwidth = 0.2)
+lblStart.place(relx = 0.5, rely = 0, height = 30, width = 80)
 
 lblStop = tk.Label(workFrame, text = 'Stop Time', anchor = tk.E)
-lblStop.place(relx = 0.5, rely = 0.2, relheight = 0.15, relwidth = 0.2)
+lblStop.place(relx = 0.5, rely = 0.15, height = 30, width = 80)
 
 lblElapsed =tk.Label(workFrame, text = 'Elapsed Time', anchor = tk.E)
-lblElapsed.place(relx = 0.5, rely = 0.4, relheight = 0.15, relwidth = 0.2)
+lblElapsed.place(relx = 0.5, rely = 0.3, height = 30, width = 80)
 
 lblAccum =tk.Label(workFrame, text = 'Accum. Time', anchor = tk.E)
-lblAccum.place(relx = 0.5, rely = 0.6, relheight = 0.15, relwidth = 0.2)
+lblAccum.place(relx = 0.5, rely = 0.45, height = 30, width = 80)
 
 
 lbl1 = tk.Label(reportFrame, text = '#1')
@@ -328,21 +357,26 @@ lbl10Time.place(relx = 0.5, rely = 0.91, width = 35, height = 30)
 ########### ENTRY FIELDS ################################################
 
 entStart = tk.Entry(workFrame, bd = 3, justify = tk.CENTER)
-entStart.place(relheight = 0.15, relwidth = 0.3, relx = 0.7, rely = 0)
+entStart.place(height = 30, width = 120, relx = 0.7, rely = 0)
 
 entStop = tk.Entry(workFrame, bd = 3, justify = tk.CENTER)
-entStop.place(relheight = 0.15, relwidth = 0.3, relx = 0.7, rely = 0.20)
+entStop.place(height = 30, width = 120, relx = 0.7, rely = 0.15)
 
 entElapsedTime = tk.Entry(workFrame, bd = 3, justify = tk.CENTER)
-entElapsedTime.place(relheight = 0.15, relwidth = 0.3, relx = 0.7, rely = 0.4)
+entElapsedTime.place(height = 30, width = 120, relx = 0.7, rely = 0.3)
 
 entAccumTime = tk.Entry(workFrame, bd = 3, justify = tk.CENTER)
-entAccumTime.place(relheight = 0.15, relwidth = 0.3, relx = 0.7, rely = 0.6)
+entAccumTime.place(height = 30, width = 120, relx = 0.7, rely = 0.45)
 
 entPauses = tk.Entry(workFrame, justify = 'center')                               
-entPauses.place(relx = 0.1, rely = 0.7, relheight = 0.1, relwidth = 0.1)     
+entPauses.place(relx = 0.61, rely = 0.6, height = 20, width = 32)     
 lblPauses = tk.Label(workFrame, text = 'Pauses')                                  
-lblPauses.place(relx = 0, rely = 0.7, relheight = 0.1, relwidth = 0.1)
+lblPauses.place(relx = 0.5, rely = 0.6, height = 20, width = 40)
+
+entTopic = tk.Entry(workFrame, bd = 3, justify = tk.LEFT)
+entTopic.place(relx = 0, rely = 0.6, height = 30, width = 128)
+
+
 
 entRank1 = tk.Entry(reportFrame, bd = 3, justify = 'center')
 entRank1Time = tk.Entry(reportFrame, bd = 3, justify = 'center')
@@ -389,19 +423,30 @@ entRank10Time.place(height  = 30, width = 150, relx = 0.6, rely = 0.91)
 ############ BUTTONS ####################################################
 
 btnStart = tk.Button(workFrame, text = 'Time Start', command = (lambda: btn_click('Start')))
-btnStart.place(relheight = 0.15, relwidth = 0.2, relx = 0, rely = 0.85)
+btnStart.place(height = 30, width = 80, relx = 0, rely = 0.85)
 
 btnPause = tk.Button(workFrame, text = 'Pause/Res', command = (lambda: btn_click('Pause')))
-btnPause.place(relheight = 0.15, relwidth = 0.15, relx = 0.25, rely = 0.85)
+btnPause.place(height = 30, width = 75, relx = 0.23, rely = 0.85)
 
 btnReset = tk.Button(workFrame, text = 'Reset', command = (lambda: btn_click('Reset')))
-btnReset.place(relheight = 0.15, relwidth = 0.15, relx = 0.45, rely = 0.85)
+btnReset.place(height = 30, width = 75, relx = 0.45, rely = 0.85)
 
 btnBank = tk.Button(workFrame, text = 'Bank It!', command = (lambda: btn_click('Bank')))
-btnBank.place(relheight = 0.15, relwidth = 0.3, relx = 0.7, rely = 0.85)
+btnBank.place(height = 30, width = 120, relx = 0.7, rely = 0.85)
 
 btnRank = tk.Button(reportFrame, text = 'Update Category Ranking', bd = 3, command = (lambda: get_rank()))
 btnRank.place(relx = 0.25, y = 0, width = 200, height = 40)
+
+btnAddTopic = tk.Button(workFrame, text = 'Add Topic', bd = 2, command = (lambda: change_topic('add')))
+btnAddTopic.place(height = 20, width = 64, relx = 0, rely = .73)
+
+btnDelTopic = tk.Button(workFrame, text = 'Delete Topic', bd = 2, command = (lambda: change_topic('delete')))
+btnDelTopic.place(height = 20, width = 80, relx = 0, rely = .48)
+
+#Set buttons initial state
+btnPause.config(state = tk.DISABLED)
+btnReset.config(state = tk.DISABLED)
+btnBank.config(state = tk.DISABLED)
 
 ############ LISTBOXES ##################################################
 """ NOTE: This code can only handle 10 subjects in the list box.
@@ -409,7 +454,7 @@ if more subjects are needed, the number of Rank boxes and the
 code that populates them must be expanded."""
 
 subjectlistBox = tk.Listbox(workFrame)
-subjectlistBox.place(relheight = 0.4, relwidth = 0.32, relx = 0, rely = 0.2)
+subjectlistBox.place(height = 85, width = 128, x = 0, y = 33)
 
 #List Box Items:
 subjectlistBox.insert(1, 'Python')
